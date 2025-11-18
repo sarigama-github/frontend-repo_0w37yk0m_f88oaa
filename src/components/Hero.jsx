@@ -1,6 +1,7 @@
-import React from 'react'
-import { motion } from 'framer-motion'
+import React, { useRef } from 'react'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import Spline from '@splinetool/react-spline'
+import BackgroundShapes from './BackgroundShapes'
 
 const Button = ({ children, variant = 'primary', href = '#apply' }) => {
   const base = 'inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-0'
@@ -18,8 +19,14 @@ const Button = ({ children, variant = 'primary', href = '#apply' }) => {
 }
 
 export default function Hero() {
+  const ref = useRef(null)
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] })
+  const liftAway = useTransform(scrollYProgress, [0, 1], [0, -120])
+  const fade = useTransform(scrollYProgress, [0, 1], [1, 0.4])
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.98])
+
   return (
-    <section className="relative h-[100dvh] w-full overflow-hidden">
+    <section ref={ref} className="relative h-[100dvh] w-full overflow-hidden">
       {/* 3D Spline background */}
       <div className="absolute inset-0">
         <Spline 
@@ -28,6 +35,9 @@ export default function Hero() {
         />
       </div>
 
+      {/* Additional geometric accents for section theming */}
+      <BackgroundShapes variant="hero" />
+
       {/* Soft gradient vignettes */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -top-40 left-0 right-0 mx-auto h-96 w-[70%] rounded-full bg-gradient-to-r from-cyan-500/15 via-fuchsia-500/10 to-emerald-500/15 blur-3xl" />
@@ -35,7 +45,7 @@ export default function Hero() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex h-full items-center">
+      <motion.div style={{ y: liftAway, opacity: fade, scale }} className="relative z-10 flex h-full items-center">
         <div className="container mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -77,7 +87,7 @@ export default function Hero() {
             </div>
           </motion.div>
         </div>
-      </div>
+      </motion.div>
     </section>
   )
 }
